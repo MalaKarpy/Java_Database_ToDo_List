@@ -18,13 +18,4 @@ public class AppTest extends FluentTest {
 
   @ClassRule
   public static ServerRule server = new ServerRule();
-
-  @Rule
-  public ClearRule clearRule = new ClearRule();
-
-  // @Test
-  // public void rootTest() {
-  //   goTo("http://localhost:4567/");
-  //   assertThat(pageSource()).contains("CD Organizer list!");
-  // }
-}  
+}

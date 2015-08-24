@@ -4,9 +4,9 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 public class ToDoCatogaryTest {
-
-  @Rule
-  public ClearRule clearRule = new ClearRule();
+  // 
+  // @Rule
+  // public ClearRule clearRule = new ClearRule();
 
   // @Test
   // public void CDOrganizer_instantiatesCorrectly_true() {

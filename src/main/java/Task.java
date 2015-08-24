@@ -1,43 +1,61 @@
-import java.util.ArrayList;
+import java.util.List;
+import org.sql2o.*;
+// import java.util.ArrayList;
 
 public class Task {
+  private int id;
+  private String description;
 
-  private static ArrayList<Task> instances = new ArrayList<Task>();
 
-  private String mDescription;
-  private int mId;
-
-  public Task(String description) {
-    mDescription = description;
-    mId = instances.size();
-    instances.add(this);
-  }
+  public int getId() {
+      return id;
+    }
 
   public String getDescription() {
-      return mDescription;
+      return description;
     }
 
+  public Task(String description) {
+      this.description = description;
+  }
 
-    public int getId() {
-      return mId;
-    }
+  public static List<Task> all() {
+     String sql = "SELECT id, description FROM Tasks";
+     try(Connection con = DB.sql2o.open()) {
+       return con.createQuery(sql).executeAndFetch(Task.class);
+     }
+   }
 
-  
-    public static ArrayList<Task> getAll() {
-      return instances;
-    }
+  @Override
+   public boolean equals(Object otherTask){
+     if (!(otherTask instanceof Task)) {
+       return false;
+     } else {
+       Task newTask = (Task) otherTask;
+       return this.getDescription().equals(newTask.getDescription()) &&
+              this.getId() == newTask.getId();
+     }
+   }
 
-    public static Task find(int id) {
-      try {
-        return instances.get(id - 1);
-      } catch (IndexOutOfBoundsException e) {
-        return null;
-      }
-    }
-
-    public static void clear() {
-      instances.clear();
-    }
+   public void save() {
+     try(Connection con = DB.sql2o.open()) {
+       String sql = "INSERT INTO Tasks (description) VALUES (:description)";
+       this.id = (int) con.createQuery(sql, true)
+          .addParameter("description", description)
+          .executeUpdate()
+          .getKey();
+     }
+   }
 
 
+   public static Task find(int id) {
+   try(Connection con = DB.sql2o.open()) {
+    String sql = "SELECT * FROM Tasks where id=:id";
+    Task task = con.createQuery(sql)
+      .addParameter("id", id)
+      .executeAndFetchFirst(Task.class);
+    return task;
+   }
+
+   }
 }
