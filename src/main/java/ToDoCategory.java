@@ -1,49 +1,65 @@
-import java.util.ArrayList;
+import java.util.List;
+import org.sql2o.*;
 
 public class ToDoCategory {
-  private static ArrayList<ToDoCategory> instances = new ArrayList<ToDoCategory>();
+  private String name;
+  private int id;
 
-  private String mName;
-  private int mId;
-  private ArrayList<Task> mTaskList = new ArrayList<Task>();
-
-  public ToDoCategory(String name) {
-    mName = name;
-    instances.add(this);
-    mId = instances.size();
-    mTaskList = new ArrayList<Task>();
+  public int getId() {
+    return id;
   }
 
   public String getName() {
-    return mName;
+    return name;
   }
 
-  public int getId() {
-    return mId;
+  public ToDoCategory(String name) {
+    this.name = name;
   }
 
-  public ArrayList<Task> getTasks() {
-    return mTaskList;
-  }
+  public static List<ToDoCategory> all() {
+      String sql = "SELECT id, name FROM Categories";
+      try(Connection con = DB.sql2o.open()) {
+        return con.createQuery(sql).executeAndFetch(ToDoCategory.class);
+      }
+    }
 
-  public void addTask(Task task) {
-    mTaskList.add(task);
-  }
+    @Override
+    public boolean equals(Object otherCategory){
+      if (!(otherCategory instanceof ToDoCategory)) {
+        return false;
+      } else {
+        ToDoCategory newCategory = (ToDoCategory) otherCategory;
+        return this.getName().equals(newCategory.getName());
+      }
+    }
 
-  public static ArrayList<ToDoCategory> all() {
-    return instances;
-  }
+    public void save() {
+      try(Connection con = DB.sql2o.open()) {
+        String sql = "INSERT INTO Categories(name) VALUES (:name)";
+        this.id = (int) con.createQuery(sql, true)
+          .addParameter("name", this.name)
+          .executeUpdate()
+          .getKey();
+      }
+    }
 
-  public static void clear() {
-    instances.clear();
-  }
-
-  public static ToDoCategory find(int id) {
-    try {
-      return instances.get(id - 1);
-    } catch (IndexOutOfBoundsException exception) {
-      return null;
+    public static ToDoCategory find(int id) {
+    try(Connection con = DB.sql2o.open()) {
+    String sql = "SELECT * FROM Categories where id=:id";
+    ToDoCategory ToDoCategory = con.createQuery(sql)
+      .addParameter("id", id)
+      .executeAndFetchFirst(ToDoCategory.class);
+    return ToDoCategory;
     }
   }
 
+  public List<Task> getTasks() {
+  try(Connection con = DB.sql2o.open()) {
+    String sql = "SELECT * FROM Tasks where categoryId=:id";
+    return con.createQuery(sql)
+      .addParameter("id", id)
+      .executeAndFetch(Task.class);
+    }
+  }
 }
