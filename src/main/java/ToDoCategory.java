@@ -24,6 +24,8 @@ public class ToDoCategory {
       }
     }
 
+  
+
     @Override
     public boolean equals(Object otherCategory){
       if (!(otherCategory instanceof ToDoCategory)) {
